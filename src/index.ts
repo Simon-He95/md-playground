@@ -37,18 +37,36 @@ export function transfer(md: string) {
         })
       }
       else {
-        props[name] = {
-          value: '',
-          description,
-          default: item[_value],
-          type: item[_callback],
+        const type = item[_callback].replaceAll('/', '|')
+        const _default = item[_value].replaceAll('/', '|')
+
+        let value = ''
+        if (_default.includes('|'))
+          value = _default.split(' | ')
+        if (name.includes('/')) {
+          name.split(' / ').forEach((name: string) => {
+            props[name] = {
+              value,
+              description,
+              default: _default,
+              type,
+            }
+          })
+        }
+        else {
+          props[name] = {
+            value,
+            description,
+            default: _default,
+            type,
+          }
         }
       }
     })
     return JSON.stringify({
       props,
       events,
-    })
+    }, null, 4)
   }
   catch (error) {
     console.error(error)

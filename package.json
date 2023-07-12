@@ -70,6 +70,7 @@
     "element-plus": "^2.2.7",
     "eslint": "^8.26.0",
     "eslint-plugin-n": "^15.3.0",
+    "highlight.js": "^11.8.0",
     "lint-staged": "^13.1.0",
     "marked": "^5.1.1",
     "picocolors": "^1.0.0",
