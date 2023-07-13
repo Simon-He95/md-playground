@@ -5,6 +5,7 @@ export function transfer(md: string) {
     const tokens = marked.lexer(md)
     const events: any = []
     const props: any = {}
+    const methods: any = []
     let name = ''
     tokens.forEach((token: any) => {
       if (token.type === 'heading') {
@@ -39,7 +40,14 @@ export function transfer(md: string) {
             events.push({
               name,
               description,
-              callback: item[_callback],
+              params: item[_callback],
+            })
+          }
+          else if (_name === '方法名') {
+            methods.push({
+              name,
+              description,
+              params: item[_callback],
             })
           }
           else {
@@ -76,6 +84,7 @@ export function transfer(md: string) {
     return JSON.stringify({
       name,
       props,
+      methods,
       events,
     }, null, 4)
   }
