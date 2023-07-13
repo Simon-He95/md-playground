@@ -44,11 +44,13 @@ export function transfer(md: string) {
           }
           else {
             const type = item[_callback].replaceAll('/', '|')
-            const _default = item[_value].replaceAll('/', '|')
+            let _default = item[_value].replaceAll('/', '|')
 
             let value = ''
             if (_default.includes('|'))
               value = _default.split(' | ')
+            else if (/^[\—\-\s]$/.test(_default) && type === 'boolean')
+              _default = 'false'
             if (name.includes('/')) {
               name.split(' / ').forEach((name: string) => {
                 props[name] = {
