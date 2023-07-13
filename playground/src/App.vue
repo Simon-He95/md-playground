@@ -2,7 +2,10 @@
 import hljs from 'highlight.js'
 import { transfer } from '../../src'
 import 'highlight.js/styles/github.css'
-const md = ref('')
+const md = ref(`---
+name: el-button
+---
+`)
 const output = computed(() => hljs.highlight(transfer(md.value)!, { language: 'JSON' }).value)
 </script>
 

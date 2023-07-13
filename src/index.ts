@@ -4,11 +4,20 @@ export function transfer(md: string) {
   try {
     const tokens = marked.lexer(md)
     const events: any = []
-    const data: any = []
-    let header: any = []
+    const props: any = {}
+    let name = ''
     tokens.forEach((token: any) => {
-      if (token.type === 'table') {
-        header = token.header.map((item: any) => item.text)
+      if (token.type === 'heading') {
+        const { text } = token
+        const match = text.match(/name:\s*([\w-]+)/)
+        if (match) {
+          name = match[1].replace(/-(\w)/g, (_: string, v: string) => v.toUpperCase())
+          name = name[0].toUpperCase() + name.slice(1)
+        }
+      }
+      else if (token.type === 'table') {
+        const data: any = []
+        const header = token.header.map((item: any) => item.text)
         const rows = token.rows
         rows.forEach((row: any) => {
           const temp: any = {}
@@ -19,51 +28,52 @@ export function transfer(md: string) {
             temp[header[i]] = content
           })
         })
-      }
-    })
-    const _name = header[0]
-    const _description = header[1]
-    const _callback = header[2]
-    const _value = header[3]
-    const props: any = {}
-    data.forEach((item: any) => {
-      const name = item[_name]
-      const description = item[_description]
-      if (name.startsWith('on')) {
-        events.push({
-          name,
-          description,
-          callback: item[_callback],
+        const _name = header[0]
+        const _description = header[1]
+        const _callback = header[2]
+        const _value = header[3]
+        data.forEach((item: any) => {
+          const name = item[_name]
+          const description = item[_description]
+          if (name.startsWith('on') || _name === '事件名称') {
+            events.push({
+              name,
+              description,
+              callback: item[_callback],
+            })
+          }
+          else {
+            const type = item[_callback].replaceAll('/', '|')
+            const _default = item[_value].replaceAll('/', '|')
+
+            let value = ''
+            if (_default.includes('|'))
+              value = _default.split(' | ')
+            if (name.includes('/')) {
+              name.split(' / ').forEach((name: string) => {
+                props[name] = {
+                  value,
+                  description,
+                  default: _default,
+                  type,
+                }
+              })
+            }
+            else {
+              props[name] = {
+                value,
+                description,
+                default: _default,
+                type,
+              }
+            }
+          }
         })
       }
-      else {
-        const type = item[_callback].replaceAll('/', '|')
-        const _default = item[_value].replaceAll('/', '|')
-
-        let value = ''
-        if (_default.includes('|'))
-          value = _default.split(' | ')
-        if (name.includes('/')) {
-          name.split(' / ').forEach((name: string) => {
-            props[name] = {
-              value,
-              description,
-              default: _default,
-              type,
-            }
-          })
-        }
-        else {
-          props[name] = {
-            value,
-            description,
-            default: _default,
-            type,
-          }
-        }
-      }
     })
+
     return JSON.stringify({
+      name,
       props,
       events,
     }, null, 4)
