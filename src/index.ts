@@ -35,7 +35,7 @@ export function transfer(md: string) {
         data.forEach((item: any) => {
           const name = item[_name]
           const description = item[_description]
-          if (name.startsWith('on') || _name === '事件名称') {
+          if ((name && name.startsWith('on')) || _name === '事件名称') {
             events.push({
               name,
               description,
@@ -43,8 +43,8 @@ export function transfer(md: string) {
             })
           }
           else {
-            const type = item[_callback].replace(/\s*\/\s*/g, ' | ')
-            let _default = item[_value].replace(/\s*\/\s*/g, ' | ')
+            const type = item[_callback] ? item[_callback].replace(/\s*\/\s*/g, ' | ') : ''
+            let _default = _value ? item[_value].replace(/\s*\/\s*/g, ' | ') : ''
             let value = ''
             if (_default.includes('|'))
               value = _default.split(' | ')
@@ -83,3 +83,10 @@ export function transfer(md: string) {
     console.error(error)
   }
 }
+
+transfer(`### Events
+| Event Name | Description | Parameters |
+|---------|--------|---------|
+| change | 用户确认选定的值时触发 | 组件绑定值。格式与绑定值一致，可受 \`value-format\` 控制 |
+| blur | 当 input 失去焦点时触发 | 组件实例 |
+| focus | 当 input 获得焦点时触发 | 组件实例 |`)
