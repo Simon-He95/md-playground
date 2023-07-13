@@ -43,7 +43,7 @@ export function transfer(md: string) {
             })
           }
           else {
-            const type = item[_callback].replaceAll('/', '|')
+            const type = item[_callback].replace(/\s*\/\s*/g, ' | ')
             let _default = item[_value].replaceAll('/', '|')
 
             let value = ''
