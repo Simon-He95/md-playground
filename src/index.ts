@@ -44,8 +44,7 @@ export function transfer(md: string) {
           }
           else {
             const type = item[_callback].replace(/\s*\/\s*/g, ' | ')
-            let _default = item[_value].replaceAll('/', '|')
-
+            let _default = item[_value].replace(/\s*\/\s*/g, ' | ')
             let value = ''
             if (_default.includes('|'))
               value = _default.split(' | ')
