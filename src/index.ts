@@ -78,7 +78,12 @@ export function transfer(md: string) {
             }
             else {
               const type = params
-              let _default = _value ? item[_value].replace(/\s*\/\s*/g, ' | ') : ''
+              let _default = _value
+                ? item[_value]
+                  .replace(/\s*\/\s*/g, ' | ')
+                  .replace(/`/g, '')
+                  .replace(/\\\\/g, '')
+                : ''
               let value = ''
               if (_default.includes('|'))
                 value = _default.split(' | ')
