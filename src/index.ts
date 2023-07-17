@@ -55,9 +55,10 @@ export function transfer(md: string) {
         else {
           data.forEach((item: any) => {
             const name = item[_name]
-            const description = item[_description]
+            const description = item[_description] ? item[_description].replaceAll('<br>', ' ') : ''
             const params = item[_callback]
               ? item[_description]
+                .replaceAll('<br>', ' ')
                 .replace(/\s*\/\s*/g, ' | ')
                 .replace(/_/g, '')
                 .replace(/\\\\/g, '')
@@ -77,9 +78,10 @@ export function transfer(md: string) {
               })
             }
             else {
-              const type = params
+              const type = params.replaceAll('<br>', ' ').replace(/`/g, '')
               let _default = _value
                 ? item[_value]
+                  .replaceAll('<br>', ' ')
                   .replace(/\s*\/\s*/g, ' | ')
                   .replace(/`/g, '')
                   .replace(/\\\\/g, '')
