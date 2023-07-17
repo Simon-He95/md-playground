@@ -6,7 +6,9 @@ export function transfer(md: string) {
     const events: any = []
     const props: any = {}
     const methods: any = []
+    const typeDetail: any = {}
     let name = ''
+    let index = 0
     tokens.forEach((token: any) => {
       if (token.type === 'heading') {
         const { text } = token
@@ -17,6 +19,7 @@ export function transfer(md: string) {
         }
       }
       else if (token.type === 'table') {
+        index++
         const data: any = []
         const header = token.header.map((item: any) => item.text)
         const rows = token.rows
@@ -33,51 +36,75 @@ export function transfer(md: string) {
         const _description = header[1]
         const _callback = header[2]
         const _value = header[3]
-        data.forEach((item: any) => {
-          const name = item[_name]
-          const description = item[_description]
-          if ((name && name.startsWith('on')) || _name === '事件名称') {
-            events.push({
+        if (/键名/.test(_name)) {
+          // 类型
+          typeDetail[`type${index}`] = data.map((item: any) => {
+            const [name, description, type] = Object.values(item)
+            return {
               name,
               description,
-              params: item[_callback],
-            })
-          }
-          else if (_name === '方法名') {
-            methods.push({
-              name,
-              description,
-              params: item[_callback],
-            })
-          }
-          else {
-            const type = item[_callback] ? item[_callback].replace(/\s*\/\s*/g, ' | ') : ''
-            let _default = _value ? item[_value].replace(/\s*\/\s*/g, ' | ') : ''
-            let value = ''
-            if (_default.includes('|'))
-              value = _default.split(' | ')
-            else if (/^[\—\-\s]$/.test(_default) && type === 'boolean')
-              _default = 'false'
-            if (name.includes('/')) {
-              name.split(' / ').forEach((name: string) => {
+              type: type
+                ? (type as string)
+                    .replace(/\s*\/\s*/g, ' | ')
+                    .replace(/_/g, '')
+                    .replace(/\\\\/g, '')
+                : '',
+            }
+          })
+        }
+        else {
+          data.forEach((item: any) => {
+            const name = item[_name]
+            const description = item[_description]
+            const params = item[_callback]
+              ? item[_description]
+                .replace(/\s*\/\s*/g, ' | ')
+                .replace(/_/g, '')
+                .replace(/\\\\/g, '')
+              : ''
+            if ((name && name.startsWith('on')) || /事件名/.test(_name)) {
+              events.push({
+                name,
+                description,
+                params,
+              })
+            }
+            else if (/'方法名'/.test(_name)) {
+              methods.push({
+                name,
+                description,
+                params,
+              })
+            }
+            else {
+              const type = params
+              let _default = _value ? item[_value].replace(/\s*\/\s*/g, ' | ') : ''
+              let value = ''
+              if (_default.includes('|'))
+                value = _default.split(' | ')
+              else if (/^[\—\-\s]$/.test(_default) && type === 'boolean')
+                _default = 'false'
+              if (name.includes('/')) {
+                name.split(' / ').forEach((name: string) => {
+                  props[name] = {
+                    value,
+                    description,
+                    default: _default,
+                    type,
+                  }
+                })
+              }
+              else {
                 props[name] = {
                   value,
                   description,
                   default: _default,
                   type,
                 }
-              })
-            }
-            else {
-              props[name] = {
-                value,
-                description,
-                default: _default,
-                type,
               }
             }
-          }
-        })
+          })
+        }
       }
     })
 
@@ -85,6 +112,7 @@ export function transfer(md: string) {
       name,
       props,
       methods,
+      typeDetail,
       events,
     }, null, 4)
   }
@@ -93,9 +121,9 @@ export function transfer(md: string) {
   }
 }
 
-transfer(`### Events
-| Event Name | Description | Parameters |
-|---------|--------|---------|
-| change | 用户确认选定的值时触发 | 组件绑定值。格式与绑定值一致，可受 \`value-format\` 控制 |
-| blur | 当 input 失去焦点时触发 | 组件实例 |
-| focus | 当 input 获得焦点时触发 | 组件实例 |`)
+transfer(`| 名称                           | 描述                 | 版本 |    
+| ------------------------------ | ------------------------------------------------- | ---- |
+| goTo(slideNumber, dontAnimate) | 切换到指定面板, dontAnimate = true 时，不使用动画 |      |
+| next()                         | 切换到下一面板                                    |      |
+| prev()                         | 切换到上一面板                                    |      |
+`)
