@@ -65,7 +65,7 @@ export function transfer(md: string) {
               : ''
             if ((name && name.startsWith('on')) || /事件名/.test(_name)) {
               events.push({
-                name,
+                name: /on-/.test(name) ? name.replace('on-', '') : name,
                 description,
                 params,
               })
