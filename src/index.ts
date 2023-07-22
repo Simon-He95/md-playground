@@ -54,7 +54,7 @@ export function transfer(md: string) {
         }
         else {
           data.forEach((item: any) => {
-            const name = item[_name]
+            const name = item[_name].replace(/`/g, '')
             const description = item[_description] ? item[_description].replaceAll('<br>', ' ') : ''
             const params = item[_callback]
               ? item[_description]
