@@ -57,7 +57,7 @@ export function transfer(md: string) {
             const name = item[_name].replace(/`/g, '')
             const description = item[_description] ? item[_description].replaceAll('<br>', ' ') : ''
             const params = item[_callback]
-              ? item[_description]
+              ? item[_callback]
                 .replaceAll('<br>', ' ')
                 .replace(/\s*\/\s*/g, ' | ')
                 .replace(/_/g, '')
@@ -70,7 +70,7 @@ export function transfer(md: string) {
                 params,
               })
             }
-            else if (/'方法名'/.test(_name)) {
+            else if (/方法名/.test(_name)) {
               methods.push({
                 name,
                 description,
