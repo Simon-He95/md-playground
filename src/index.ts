@@ -9,6 +9,7 @@ export function transfer(md: string) {
     const typeDetail: any = {}
     let name = ''
     let index = 0
+
     tokens.forEach((token: any) => {
       if (token.type === 'heading') {
         const { text } = token
@@ -114,8 +115,9 @@ export function transfer(md: string) {
         }
       }
       else if (token.type === 'list') {
-        token.items.forEach((item: any) => {
-          const text = item.text.replace(/\s+/g, ' ').split(' ')
+        const items = token.raw.split('\n')
+        items.forEach((item: any) => {
+          const text = item.replace(/\s*\*\s*/g, '').replace(/\s+/g, ' ').split(' ')
           const prop = text[0]
           if (prop[0] === '@') {
             const propName = prop.slice(1)
@@ -135,8 +137,30 @@ export function transfer(md: string) {
               })
             }
           }
-          else {
-            name = prop
+        })
+      }
+      else if (token.type === 'code') {
+        const items = token.text.split('\n')
+        items.forEach((item: any) => {
+          const text = item.replace(/\s*\*\s*/g, '').replace(/\s+/g, ' ').split(' ')
+          const prop = text[0]
+          if (prop[0] === '@') {
+            const propName = prop.slice(1)
+            if (propName === 'property') {
+              props[text[2]] = {
+                value: '',
+                description: text[3],
+                default: '',
+                type: text[1].slice(1, -1),
+              }
+            }
+            else if (propName === 'event') {
+              events.push({
+                name: text[2],
+                description: text[3],
+                params: text[1].slice(1, -1),
+              })
+            }
           }
         })
       }
