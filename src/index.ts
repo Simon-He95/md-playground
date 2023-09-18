@@ -15,7 +15,9 @@ export function transfer(md: string) {
         const { text } = token
         const match = text.match(/name:\s*([\w-]+)/)
         if (match) {
-          name = match[1].replace(/-(\w)/g, (_: string, v: string) => v.toUpperCase())
+          name = match[1].replace(/-(\w)/g, (_: string, v: string) =>
+            v.toUpperCase(),
+          )
           name = name[0].toUpperCase() + name.slice(1)
         }
       }
@@ -40,7 +42,18 @@ export function transfer(md: string) {
         if (/键名/.test(_name)) {
           // 类型
           typeDetail[`type${index}`] = data.map((item: any) => {
-            const [name, description, type] = Object.values(item)
+            let name = ''
+            let description = ''
+            let type = ''
+
+            Object.keys(item).forEach((key) => {
+              if (key === '键名')
+                name = item[key]
+              else if (key === '类型')
+                type = item[key]
+              else if (key === '介绍' || key === '说明' || key === '描述')
+                description = item[key]
+            })
             return {
               name,
               description,
@@ -56,14 +69,15 @@ export function transfer(md: string) {
         else {
           data.forEach((item: any) => {
             const name = item[_name].replace(/`/g, '')
-            const description = item[_description] ? item[_description].replaceAll('<br>', ' ') : ''
-            const params = item[_callback]
-              ? item[_callback]
-                .replaceAll('<br>', ' ')
+            const _des = item['说明'] ?? item['描述'] ?? item[_description]
+            const _par = item['类型'] ?? item[_callback]
+            const description = _des?.replaceAll('<br>', ' ') || ''
+            const params
+              = _par
+                ?.replaceAll('<br>', ' ')
                 .replace(/\s*\/\s*/g, ' | ')
                 .replace(/_/g, '')
-                .replace(/\\\\/g, '')
-              : ''
+                .replace(/\\\\/g, '') || ''
             if ((name && name.startsWith('on')) || /事件名/.test(_name)) {
               events.push({
                 name: /on-/.test(name) ? name.replace('on-', '') : name,
@@ -80,13 +94,13 @@ export function transfer(md: string) {
             }
             else {
               const type = params.replaceAll('<br>', ' ').replace(/`/g, '')
-              let _default = _value
-                ? item[_value]
-                  .replaceAll('<br>', ' ')
+              const _v = item['默认值'] ?? item[_value]
+              let _default
+                = _v
+                  ?.replaceAll('<br>', ' ')
                   .replace(/\s*\/\s*/g, ' | ')
                   .replace(/`/g, '')
-                  .replace(/\\\\/g, '')
-                : ''
+                  .replace(/\\\\/g, '') || ''
               let value = ''
               if (_default.includes('|'))
                 value = _default.split(' | ')
@@ -117,7 +131,10 @@ export function transfer(md: string) {
       else if (token.type === 'list') {
         const items = token.raw.split('\n')
         items.forEach((item: any) => {
-          const text = item.replace(/\s*\*\s*/g, '').replace(/\s+/g, ' ').split(' ')
+          const text = item
+            .replace(/\s*\*\s*/g, '')
+            .replace(/\s+/g, ' ')
+            .split(' ')
           const prop = text[0]
           if (prop[0] === '@') {
             const propName = prop.slice(1)
@@ -142,7 +159,10 @@ export function transfer(md: string) {
       else if (token.type === 'code') {
         const items = token.text.split('\n')
         items.forEach((item: any) => {
-          const text = item.replace(/\s*\*\s*/g, '').replace(/\s+/g, ' ').split(' ')
+          const text = item
+            .replace(/\s*\*\s*/g, '')
+            .replace(/\s+/g, ' ')
+            .split(' ')
           const prop = text[0]
           if (prop[0] === '@') {
             const propName = prop.slice(1)
@@ -166,13 +186,17 @@ export function transfer(md: string) {
       }
     })
 
-    return JSON.stringify({
-      name,
-      props,
-      methods,
-      typeDetail,
-      events,
-    }, null, 4)
+    return JSON.stringify(
+      {
+        name,
+        props,
+        methods,
+        typeDetail,
+        events,
+      },
+      null,
+      4,
+    )
   }
   catch (error) {
     console.error(error)
